@@ -1,5 +1,7 @@
 package com.example.android.mediaplayer
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
@@ -9,6 +11,9 @@ import androidx.media.MediaBrowserServiceCompat
 
 class MusicForeground : MediaBrowserServiceCompat() {
     private lateinit var mediaPlayer: MediaPlayer
+    private var musicNotificationManager:MusicNotificationManager? = null
+    private var notificationActionReceiver :NotificationReceiver? = null
+
 
     override fun onGetRoot(
         clientPackageName: String,
@@ -35,6 +40,23 @@ class MusicForeground : MediaBrowserServiceCompat() {
     fun onPause() {
         if (mediaPlayer != null && mediaPlayer.isPlaying) {
             mediaPlayer.pause()
+            musicNotificationManager!!.notificationManager.notify(MusicNotificationManager.NOTIFICATION_ID,musicNotificationManager!!
+                .createNotification())
+        }
+
+    }
+
+    private inner class NotificationReceiver :BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val action = intent?.action
+            if(action != null) {
+                when(action) {
+                    MusicNotificationManager.ACTIONPAUSE ->onPause()
+                    MusicNotificationManager.ACTIONPLAY -> play()
+                    MusicNotificationManager.ACTIONSTOP -> onDestroy()
+
+                }
+            }
         }
 
     }
@@ -47,7 +69,15 @@ class MusicForeground : MediaBrowserServiceCompat() {
         if (intent?.action.equals("PAUSE")) {
             mediaPlayer.pause()
         }
+
         return START_STICKY
+    }
+
+    fun play() {
+        if( !mediaPlayer.isPlaying)
+        mediaPlayer.start()
+        musicNotificationManager?.notificationManager?.notify(MusicNotificationManager.NOTIFICATION_ID,musicNotificationManager!!
+            .createNotification())
     }
 
 
@@ -55,6 +85,7 @@ class MusicForeground : MediaBrowserServiceCompat() {
         super.onDestroy()
 
         mediaPlayer.stop()
+        musicNotificationManager = null
         mediaPlayer.release()
     }
 

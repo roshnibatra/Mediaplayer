@@ -12,6 +12,8 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var buttonStop: ImageButton
     private lateinit var pauseButton: ImageButton
     private var isPlaying: Boolean = true
+    private var musicNotificationManager: MusicNotificationManager? = null
+    private var musicForeground : MusicForeground? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,6 +52,7 @@ class MusicActivity : AppCompatActivity(), View.OnClickListener {
             myService.action = action
             startService(myService)
         }
+
 
 
     }
